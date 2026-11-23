@@ -5,7 +5,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '../components/ui/toolti
 import { cn } from '../lib/utils'
 import { IconButton } from './Button'
 import { Switch } from './Switch'
-import logoUrl from '../assets/logo.svg'
 
 /**
  * Custom window title bar (44 px). The bar is a drag region; the two buttons are not.
@@ -14,7 +13,6 @@ export function TitleBar({ onMinimize, onClose }: { onMinimize: () => void; onCl
   return (
     <div className="k-titlebar flex items-center justify-between shrink-0 h-11 pl-4 pr-2.5 border-b border-[#1c1c1c] bg-[#0b0d11] backdrop-blur-xl select-none">
       <div className="k-titlebar__title flex items-center gap-2.5 text-[13px] font-medium text-muted-foreground">
-        <img src={logoUrl} alt="" width={20} height={20} className="shrink-0 rounded-[5px]" draggable={false} />
         <span>fun KNOB</span>
       </div>
       <div className="k-titlebar__ctrl flex items-center gap-1">
