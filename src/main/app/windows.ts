@@ -14,7 +14,7 @@ function preferences(kind: string): Electron.WebPreferences {
 }
 export function createDashboardWindow(): BrowserWindow {
   if (dashboard && !dashboard.isDestroyed()) return dashboard
-  const win = new BrowserWindow({ width: 1280, height: 800, frame: false, resizable: false, backgroundColor: '#000000', webPreferences: preferences('dashboard') })
+  const win = new BrowserWindow({ width: 1280, height: 800, minWidth: 1100, minHeight: 680, frame: false, resizable: true, backgroundColor: '#000000', webPreferences: preferences('dashboard') })
   dashboard = win
   win.on('close', e => { if (!quitting) { e.preventDefault(); win.hide() } })
   win.on('closed', () => { dashboard = undefined })
