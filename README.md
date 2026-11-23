@@ -6,7 +6,7 @@
 
 # fun KNOB
 
-Windows desktop app that turns the Kreo keyboard knob into a multi-use dial: system controls (volume, brightness, mic, media), per-app shortcut sets, macros, and a DJ-style scratch mode, with an on-screen dial overlay.
+Windows desktop app that turns a keyboard volume knob into a multi-use dial (built and tested with the Kreo keyboard knob; it works from the Volume Up / Down / Mute keys, so other knobs that send those keys should work too): system controls (volume, brightness, mic, media), per-app shortcut sets, macros, and a DJ-style scratch mode, with an on-screen dial overlay.
 
 Electron + React + TypeScript + Tailwind.
 
