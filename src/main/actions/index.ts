@@ -28,7 +28,8 @@ export function createActions(deps: { native: NativeApi; openTarget(target: stri
         if (effect.type === 'open-app') {
           const app = settings.apps.find(a => a.id === effect.appId)
           if (!app) return warning('App not found')
-          if (n.isProcessRunning(app.processName)) { if (!n.focusProcess(app.processName)) return warning(`${app.name} not found`) }
+          // Running with no visible window (e.g. Figma hidden in the background) can't be focused; starting it again re-shows it.
+          if (n.isProcessRunning(app.processName) && n.focusProcess(app.processName)) { /* in front */ }
           else if (app.exePath && existsSync(app.exePath)) await deps.launchApp(app.exePath)
           else return warning(`${app.name} not found`)
           return readout('message', app.icon, `Opening ${app.name}`)

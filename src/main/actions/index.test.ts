@@ -10,6 +10,15 @@ function setup() {
   return { native, turnDj, actions: createActions({ native, turnDj, openTarget: async () => {}, launchApp: async () => {} }) }
 }
 describe('actions', () => {
+  it('starts an app that is running with no visible window instead of reporting it missing', async () => {
+    const native = { isProcessRunning: vi.fn(() => true), focusProcess: vi.fn(() => false) } as unknown as NativeApi
+    const launchApp = vi.fn(async () => {})
+    const actions = createActions({ native, turnDj: vi.fn(), openTarget: async () => {}, launchApp })
+    const app = { id: 'figma', name: 'Figma', icon: 'app-design', processName: 'Figma.exe', exePath: process.execPath, slots: [] }
+    const result = await actions.run({ type: 'open-app', appId: 'figma' }, { apps: [app], macros: [] } as unknown as Settings)
+    expect(launchApp).toHaveBeenCalledWith(process.execPath)
+    expect(result).toMatchObject({ kind: 'message', label: 'Opening Figma' })
+  })
   it('routes each DJ detent and shows the DJ pill', async () => {
     const { actions, native, turnDj } = setup()
     for (const dir of [-1, 1] as const) {
