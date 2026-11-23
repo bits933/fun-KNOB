@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="resources/logo-gradient.png" width="140" alt="fun KNOB logo" />
+  <img src="resources/logo-pixel.png" width="140" alt="fun KNOB logo" style="image-rendering: pixelated" />
 </p>
 
 # fun KNOB
