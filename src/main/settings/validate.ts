@@ -1,0 +1,42 @@
+import { defaultSettings, SYSTEM_STEP } from '../../shared/defaults'
+import { KEY_VK, MODIFIERS, normalizeKeys } from '../../shared/keys'
+import { MAX_MACRO_STEPS, MIN_SLOTS, MAX_SLOTS } from '../../shared/types'
+import type { Settings, Stroke, MacroStep, CustomSlot, MainSlot, FolderItem } from '../../shared/types'
+
+type Obj = Record<string, unknown>
+const obj = (v: unknown): Obj => v !== null && typeof v === 'object' && !Array.isArray(v) ? v as Obj : {}
+export function validate(raw: unknown): { settings: Settings; problems: string[] } {
+  const defaults = defaultSettings(), problems: string[] = []
+  try {
+    const root = obj(raw)
+    if (root.version !== 1 && root.version !== 2) return { settings: defaults, problems: ['Unsupported or missing settings version'] }
+    const bad = (path: string) => { problems.push(path) }
+    const str = (v: unknown, fallback: string, path: string) => { if (typeof v === 'string') return v; bad(path); return fallback }
+    const bool = (v: unknown, fallback: boolean, path: string) => { if (typeof v === 'boolean') return v; bad(path); return fallback }
+    const num = (v: unknown, fallback: number, min: number, max: number, path: string) => { if (typeof v !== 'number' || !Number.isFinite(v)) { bad(path); return fallback }; const n = Math.min(max, Math.max(min, v)); if (n !== v) bad(path); return n }
+    const choice = <T extends string>(v: unknown, options: readonly T[], fallback: T, path: string): T => { if (typeof v === 'string' && options.includes(v as T)) return v as T; bad(path); return fallback }
+    const arr = (v: unknown, fallback: unknown[], path: string): unknown[] => { if (Array.isArray(v)) return v; bad(path); return fallback }
+    const bounded = (a: unknown[], path: string): unknown[] => { if (a.length < MIN_SLOTS || a.length > MAX_SLOTS) bad(path); return Array.from({ length: Math.min(MAX_SLOTS, Math.max(MIN_SLOTS, a.length)) }, (_, i) => a[i] ?? null) }
+    const keys = (v: unknown, path: string) => { const a = arr(v, [], path); const valid = a.filter((k): k is string => typeof k === 'string' && Object.hasOwn(KEY_VK, k)); if (valid.length !== a.length) bad(path); return normalizeKeys(valid) }
+    const stroke = (v: unknown, path: string): Stroke | null => { if (v === null) return null; const o = obj(v); if (o.type === 'keys') return { type: 'keys', keys: keys(o.keys, path) }; if (o.type === 'wheel') return { type: 'wheel', dir: choice(o.dir, ['up','down','left','right'], 'up', path), mods: (() => { const all = keys(o.mods, path), mods = all.filter(k => MODIFIERS.includes(k)); if (mods.length !== all.length) bad(path); return mods })() }; bad(path); return null }
+    const appIds = new Set<string>(), macroIds = new Set<string>()
+    const unique = (id: string, seen: Set<string>, path: string) => { if (!id.trim() || seen.has(id)) { bad(path); return false }; seen.add(id); return true }
+    const apps = arr(root.apps, defaults.apps, 'apps').map((v, i) => {
+      const a = obj(v), d = defaults.apps.find(x => x.id === a.id), slots = bounded(arr(a.slots, d?.slots ?? [], `apps.${i}.slots`), `apps.${i}.slots`)
+      return { id: str(a.id, d?.id ?? '', `apps.${i}.id`), name: str(a.name, d?.name ?? '', `apps.${i}.name`), icon: str(a.icon, d?.icon ?? '', `apps.${i}.icon`), exePath: str(a.exePath, d?.exePath ?? '', `apps.${i}.exePath`), processName: str(a.processName, d?.processName ?? '', `apps.${i}.processName`), slots: Array.from({length: slots.length}, (_, j) => {
+        const v = slots[j]; if (v === null) return null
+        const s = obj(v), fallback = d?.slots[j]; return { name: str(s.name, fallback?.name ?? '', 'slot.name'), icon: str(s.icon, fallback?.icon ?? '', 'slot.icon'), left: stroke(s.left === undefined ? fallback?.left ?? null : s.left, 'slot.left'), right: stroke(s.right === undefined ? fallback?.right ?? null : s.right, 'slot.right'), click: stroke(s.click === undefined ? fallback?.click ?? null : s.click, 'slot.click') }
+      }) }
+    })
+    const validApps = apps.filter(a => unique(a.id, appIds, 'app.id'))
+    const macros = arr(root.macros, [], 'macros').map((v, i) => { const m = obj(v), steps = arr(m.steps, [], `macros.${i}.steps`); if (steps.length > MAX_MACRO_STEPS) bad(`macros.${i}.steps`); return { id: str(m.id, '', 'macro.id'), name: str(m.name, '', 'macro.name'), icon: str(m.icon, '', 'macro.icon'), steps: steps.slice(0, MAX_MACRO_STEPS).flatMap((v): MacroStep[] => { const s = obj(v); if (s.type === 'keys') return [{type:'keys', keys:keys(s.keys, 'step.keys')}]; if (s.type === 'text') return [{type:'text', text:str(s.text, '', 'step.text')}]; if (s.type === 'open') return [{type:'open', target:str(s.target, '', 'step.target')}]; if (s.type === 'wait') return [{type:'wait', ms:num(s.ms, 0, 0, 3600000, 'step.ms')}]; bad('step.type'); return [] }) } })
+    const validMacros = macros.filter(m => unique(m.id, macroIds, 'macro.id'))
+    const item = (v: unknown): FolderItem | null => { if (v === null) return null; const o = obj(v); if (o.type === 'app' && validApps.some(a => a.id === o.appId)) return {type:'app', appId:o.appId as string}; if (o.type === 'macro' && validMacros.some(m => m.id === o.macroId)) return {type:'macro', macroId:o.macroId as string}; bad('missing reference'); return null }
+    const main = obj(root.mainDial)
+    const slots = root.version === 1 ? [...arr(main.system, defaults.mainDial.slots.slice(0, 6), 'mainDial.system').map(v => ({...obj(v), type:'system'})), ...arr(main.custom, defaults.mainDial.slots.slice(6), 'mainDial.custom')] : arr(main.slots, defaults.mainDial.slots, 'mainDial.slots')
+    const custom = (v: unknown): CustomSlot => { const o = obj(v); if (o.type === 'empty') return {type:'empty'}; if (o.type === 'folder') { const items = bounded(arr(o.items, [], 'folder.items'), 'folder.items'); return {type:'folder', name:str(o.name, '', 'folder.name'), icon:str(o.icon, '', 'folder.icon'), items:Array.from({length:items.length}, (_, i) => item(items[i] ?? null))} }; return item(v) ?? {type:'empty'} }
+    const g = obj(root.gestures), d = defaults.gestures, n = obj(root.general), h = defaults.general
+    const settings: Settings = { version:2, enabled:bool(root.enabled, defaults.enabled, 'enabled'), apps: validApps, macros: validMacros, mainDial: { slots: bounded(slots, 'mainDial.slots').map((v): MainSlot => { const o = obj(v); if (o.type !== 'system') return v === null ? {type:'empty'} : custom(v); const control = choice(o.control, Object.keys(SYSTEM_STEP) as (keyof typeof SYSTEM_STEP)[], 'volume', 'system.control'); const value = num(o.step, SYSTEM_STEP[control], 1, 1000, 'system.step'); if (value !== Math.round(value)) bad('system.step'); return {type:'system', control, step:Math.round(value)} }) }, gestures: { doubleClickMs:num(g.doubleClickMs,d.doubleClickMs,100,2000,'doubleClickMs'), longPressMs:num(g.longPressMs,d.longPressMs,100,5000,'longPressMs'), holdChainMs:num(g.holdChainMs,d.holdChainMs,100,5000,'holdChainMs'), closedDouble:choice(g.closedDouble,['play-pause','next-track','none'],d.closedDouble,'closedDouble'), closedLong:choice(g.closedLong,['mute','none'],d.closedLong,'closedLong'), holdRotate:choice(g.holdRotate,['cycle','none'],d.holdRotate,'holdRotate') }, general: { startWithWindows:bool(n.startWithWindows,h.startWithWindows,'startWithWindows'), runAsAdmin:bool(n.runAsAdmin,h.runAsAdmin,'runAsAdmin'), showReadout:bool(n.showReadout,h.showReadout,'showReadout'), dialSizePercent:num(n.dialSizePercent,h.dialSizePercent,60,140,'dialSizePercent'), levelSizePercent:num(n.levelSizePercent,h.levelSizePercent,40,140,'levelSizePercent'), levelPosition:choice(n.levelPosition,['top-left','top','top-right','left','center','right','bottom-left','bottom','bottom-right'],h.levelPosition,'levelPosition'), autoCloseMs:num(n.autoCloseMs,h.autoCloseMs,250,60000,'autoCloseMs'), opensOn:choice(n.opensOn,['cursor-screen','primary-screen'],h.opensOn,'opensOn'), firstRunDone:bool(n.firstRunDone,h.firstRunDone,'firstRunDone'), defaultControl: n.defaultControl === undefined ? h.defaultControl : n.defaultControl === null ? null : choice(n.defaultControl, Object.keys(SYSTEM_STEP) as (keyof typeof SYSTEM_STEP)[], h.defaultControl ?? 'volume', 'defaultControl'), defaultReturnMs: n.defaultReturnMs === undefined ? h.defaultReturnMs : num(n.defaultReturnMs, h.defaultReturnMs, 5000, 300000, 'defaultReturnMs') } }
+    return { settings, problems }
+  } catch { return { settings: defaults, problems: ['Unable to validate settings'] } }
+}

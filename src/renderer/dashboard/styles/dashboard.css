@@ -1,0 +1,183 @@
+/* Dashboard Tailwind v4 + DesignCode UI Dark Glass semantic design tokens & base rules.
+ * Features deep obsidian-midnight surfaces, translucent frosted glass elevation, generous
+ * 4pt/8pt spacing rhythm, and a single crisp lighter colored stroke for all active/focused states.
+ */
+@import "tailwindcss";
+
+:root {
+  --k-bg: #07090d;
+  --k-sidebar: #0a0c11;
+  --k-card: rgba(12, 14, 20, 0.90);
+  --k-popover: #11141c;
+  --k-input: #0a0c12;
+  --k-input-hover: #0e1118;
+  --k-secondary: rgba(255, 255, 255, 0.055);
+  --k-secondary-hover: rgba(255, 255, 255, 0.095);
+  --k-muted: rgba(255, 255, 255, 0.04);
+  --k-fg: #f5f7fa;
+  --k-muted-fg: #8e95a3;
+  --k-subtle-fg: #6c7382;
+  --k-seg-track: #0a0c12;
+  --k-seg-thumb: #1b1f29;
+  --k-table-bg: #0a0c12;
+  --k-field-border: rgba(255, 255, 255, 0.06);
+  --k-field-border-hover: rgba(255, 255, 255, 0.10);
+  --k-border: rgba(255, 255, 255, 0.055);
+  --k-border-strong: rgba(255, 255, 255, 0.095);
+  /* Universal neutral stroke for active, open, and focused input states (no glow, no double stroke) */
+  --k-active-border: #2C2C2C;
+  --k-glass-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --k-popover-shadow: 0 20px 52px rgba(0, 0, 0, 0.62);
+}
+
+@theme inline {
+  --color-background: var(--k-bg);
+  --color-foreground: var(--k-fg);
+  --color-card: var(--k-card);
+  --color-card-foreground: var(--k-fg);
+  --color-popover: var(--k-popover);
+  --color-popover-foreground: var(--k-fg);
+  --color-primary: var(--accent-solid);
+  --color-primary-hover: var(--accent-start);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--k-secondary);
+  --color-secondary-hover: var(--k-secondary-hover);
+  --color-secondary-foreground: var(--k-fg);
+  --color-muted: var(--k-muted);
+  --color-muted-foreground: var(--k-muted-fg);
+  --color-subtle-foreground: var(--k-subtle-fg);
+  --color-accent: var(--accent-tint);
+  --color-accent-foreground: var(--accent-text);
+  --color-active-border: var(--k-active-border);
+  --color-destructive: var(--status-error);
+  --color-destructive-foreground: #ffffff;
+  --color-warning: var(--status-warning);
+  --color-border: var(--k-border);
+  --color-border-strong: var(--k-border-strong);
+  --color-input: var(--k-input);
+  --color-ring: var(--k-active-border);
+  --color-sidebar: var(--k-sidebar);
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+
+  --font-sans: var(--font);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    background: transparent;
+    color: var(--k-fg);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.45;
+    overflow: hidden;
+    cursor: default;
+  }
+
+  button,
+  [role="button"],
+  [role="switch"],
+  [role="combobox"],
+  [role="slider"],
+  [role="radio"],
+  [role="checkbox"],
+  [role="option"],
+  input,
+  textarea,
+  select {
+    -webkit-app-region: no-drag;
+  }
+
+  /* Thin dark scrollbar across dashboard */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    background: transparent;
+  }
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.16);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.28);
+  }
+  ::-webkit-scrollbar-button {
+    display: none;
+  }
+}
+
+@layer components {
+  /* DesignCode UI Dark Glass surface utility */
+  .dc-glass {
+    background: var(--k-card);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--k-border);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  }
+
+  /* Clean single-stroke dark glass input field (no inner rim stroke, no glow) */
+  .dc-field {
+    background: var(--k-input);
+    border: 1px solid var(--k-field-border);
+    box-shadow: none;
+  }
+  .dc-field:hover:not(:disabled) {
+    background: var(--k-input-hover);
+    border-color: var(--k-field-border-hover);
+  }
+
+  /* Neutral charcoal (zero blue tint) surface set for the nav rail and side panels. */
+  .k-side-theme {
+    --k-card: #141414;
+    --k-popover: #181818;
+    --k-input: #161616;
+    --k-input-hover: #1b1b1b;
+    --k-secondary: #1a1a1a;
+    --k-secondary-hover: #222222;
+    --k-muted: #181818;
+    --k-fg: #f2f2f2;
+    --k-muted-fg: #8c8c8c;
+    --k-subtle-fg: #6f6f6f;
+    --k-border: #1e1e1e;
+    --k-border-strong: #262626;
+    --k-active-border: #2C2C2C;
+    --k-field-border: #222222;
+    --k-field-border-hover: #272727;
+    --k-seg-track: #161616;
+    --k-seg-thumb: #262626;
+    --k-table-bg: #141414;
+  }
+}
+
+@keyframes k-fade-only {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-none-reduced {
+    animation: none !important;
+    transition-property: opacity, color, background-color, border-color !important;
+  }
+}

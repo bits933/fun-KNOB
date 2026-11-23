@@ -1,0 +1,510 @@
+/*
+ * Dashboard UI kit styles (Tailwind v4 @layer components).
+ * Preserves all dial, segment, list-group, and position-grid rules while letting Tailwind utilities take precedence.
+ * Motion: transform + opacity for movement, 100–220 ms ease-out, reduced motion = fades only.
+ */
+
+@layer components {
+  /* ───────── shared ───────── */
+  .k-btn,
+  .k-iconbtn,
+  .k-switch,
+  .k-slider,
+  .k-dd__field,
+  .k-nav__item,
+  .k-seg__opt,
+  .k-rec,
+  .k-row--click,
+  .k-tile {
+    -webkit-app-region: no-drag;
+  }
+
+  .k-label {
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.35;
+    letter-spacing: 0.005em;
+    color: var(--k-muted-fg);
+  }
+  .k-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  /* ───────── Segmented control (DesignCode UI elevated dark glass thumb) ───────── */
+  .k-seg__thumb {
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    bottom: 4px;
+    border-radius: 10px;
+    background: var(--k-seg-thumb);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    --w: calc((100% - 8px - (var(--n) - 1) * 4px) / var(--n));
+    left: calc(4px + var(--i) * (var(--w) + 4px));
+    right: calc(4px + (var(--n) - 1 - var(--i)) * (var(--w) + 4px));
+    /* Stretch: the leading edge springs ahead, the trailing edge catches up. */
+    --lead: 260ms cubic-bezier(0.3, 1.35, 0.5, 1);
+    --trail: 360ms 70ms cubic-bezier(0.25, 1, 0.4, 1);
+    transition: left var(--trail), right var(--lead), opacity var(--dur-fast) var(--ease-out);
+  }
+  .k-seg[data-dir='-1'] .k-seg__thumb {
+    transition: left var(--lead), right var(--trail), opacity var(--dur-fast) var(--ease-out);
+  }
+  .k-seg[data-none='true'] .k-seg__thumb {
+    opacity: 0;
+    transition: none;
+  }
+
+  /* ───────── Position grid ───────── */
+  .k-posgrid__cell {
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+    -webkit-app-region: no-drag;
+  }
+  .k-posgrid__cell::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--k-subtle-fg);
+    transition: background-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  }
+  .k-posgrid__cell:hover::before {
+    background: var(--k-fg);
+  }
+  .k-posgrid__cell[aria-checked='true']::before {
+    background: var(--accent-text);
+    transform: scale(2);
+  }
+  .k-posgrid__cell:focus-visible {
+    outline: 1px solid var(--k-active-border);
+    outline-offset: -1px;
+  }
+
+  /* ───────── Shortcut recorder pulse ───────── */
+  .k-rec__dot {
+    animation: k-blink 1.2s ease-in-out infinite;
+  }
+
+  /* ───────── List row & gliding selection bar ───────── */
+  .k-listgroup__bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--accent-text);
+    transform: translateY(var(--y, 0px));
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+    transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out);
+  }
+  .k-listgroup__bar--on {
+    opacity: 1;
+  }
+  .k-row__bar {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    margin-top: -12px;
+    width: 3px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--accent-text);
+    opacity: 0;
+    transform: scaleY(0.5);
+    transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+  }
+  .k-row[data-selected='true'] .k-row__bar {
+    opacity: 1;
+    transform: none;
+  }
+  .k-listgroup .k-row__bar {
+    display: none;
+  }
+
+  /* ───────── Window title bar & Kreo emblem ───────── */
+  .k-titlebar {
+    -webkit-app-region: drag;
+  }
+  .k-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-full);
+    background: var(--k-secondary);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+  .k-mark::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: var(--accent-gradient);
+  }
+  .k-mark--sm {
+    width: 16px;
+    height: 16px;
+  }
+  .k-mark--sm::after {
+    width: 6px;
+    height: 6px;
+  }
+
+  /* ───────── Side panel ───────── */
+  .k-panel {
+    animation: k-slide-in var(--dur-base) var(--ease-out) both;
+  }
+  .k-panel.k-panel--pinned {
+    animation: none;
+  }
+  /* Panel content swap (slot type / control change): a soft blur-in, no height animation. */
+  .k-swap {
+    animation: k-swap-in 220ms var(--ease-out) both;
+  }
+  @keyframes k-swap-in {
+    from {
+      opacity: 0;
+      filter: blur(4px);
+      transform: translateY(4px);
+    }
+  }
+
+  /* ───────── Popover / Tooltip / Dialog micro-animations ───────── */
+  .k-ui-popover {
+    animation: k-pop var(--dur-fast) var(--ease-out) both;
+  }
+  .k-ui-tooltip {
+    animation: k-pop 120ms var(--ease-out) both;
+  }
+  .k-ui-overlay {
+    animation: k-fade-only 140ms var(--ease-out) both;
+  }
+  .k-ui-dialog {
+    animation: k-dialog-in 160ms var(--ease-out) both;
+  }
+
+  /* ───────── Toast + readout pill ───────── */
+  .k-toastzone {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: var(--space-24);
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 50;
+  }
+  .k-toast {
+    animation: k-toast-in var(--dur-base) var(--ease-out) both;
+  }
+
+  .k-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-12);
+    height: 46px;
+    padding: 12px 20px 12px 16px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-full);
+    background: var(--surface-base);
+    box-shadow: var(--shadow-pill);
+    font: var(--text-body);
+    white-space: nowrap;
+  }
+  .k-pill__icon {
+    display: flex;
+    flex: none;
+  }
+  .k-pill--value .k-pill__icon {
+    color: var(--text-primary);
+  }
+  .k-pill--message .k-pill__icon {
+    color: var(--accent-text);
+  }
+  .k-pill--warning .k-pill__icon {
+    color: var(--status-warning);
+  }
+  .k-pill__label {
+    font: var(--text-body-strong);
+  }
+  .k-pill__bar {
+    position: relative;
+    flex: none;
+    width: 96px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--surface-hover);
+    overflow: hidden;
+  }
+  .k-pill__fill {
+    position: absolute;
+    inset: 0;
+    background: var(--accent-text);
+    border-radius: 2px;
+    transform-origin: left center;
+    transform: scaleX(var(--p, 0));
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .k-pill__value {
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ───────── Dial preview ───────── */
+  .k-dial {
+    position: relative;
+    flex: none;
+  }
+  .k-dial__stage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 600px;
+    height: 600px;
+    transform-origin: 0 0;
+  }
+  .k-dial__svg {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+  }
+  .k-dial__hl {
+    transform-origin: 300px 300px;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  /* Slot = an arm from the centre turned to its angle; upright turns back so the icon stays level while it slides. */
+  .k-dial__slot {
+    position: absolute;
+    left: 300px;
+    top: 300px;
+    width: 0;
+    height: 0;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .k-dial__upright {
+    position: absolute;
+    left: -14px;
+    width: 28px;
+    height: 28px;
+    transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-instant) var(--ease-out);
+  }
+  .k-dial__slot[data-lifted] .k-dial__upright {
+    opacity: 0;
+  }
+  .k-dial--snap .k-dial__slot,
+  .k-dial--snap .k-dial__upright,
+  .k-dial--snap .k-dial__hl {
+    transition: none;
+  }
+  .k-dial__icon {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 28px;
+    height: 28px;
+    color: var(--text-secondary);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+  /* Real app icons are full colour: dim them a little instead of tinting, full strength when highlighted. */
+  .k-dial__icon img {
+    opacity: 0.72;
+    transition: opacity var(--dur-fast) var(--ease-out);
+  }
+  .k-dial__icon--hl img {
+    opacity: 1;
+  }
+  .k-dial__icon--hl {
+    color: var(--text-primary);
+  }
+  .k-dial__icon--empty {
+    color: var(--text-muted);
+  }
+  .k-dial__icon--missing {
+    color: var(--status-warning);
+  }
+  .k-dial__active {
+    position: absolute;
+    left: -3px;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--accent-text);
+  }
+  .k-dial__centre {
+    position: absolute;
+    left: 200px;
+    top: 200px;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-align: center;
+  }
+  .k-dial__name {
+    font: var(--text-title);
+    letter-spacing: -0.5px;
+    color: var(--text-secondary);
+    transition: opacity var(--dur-fast) var(--ease-out);
+  }
+  .k-dial__level {
+    font: var(--text-label);
+    letter-spacing: 0.2px;
+    color: var(--text-muted);
+  }
+  .k-dial__hint {
+    font: var(--text-caption);
+    color: var(--text-muted);
+    padding: 0 12px;
+  }
+
+  /* ───────── reduced motion: fades only ───────── */
+  @media (prefers-reduced-motion: reduce) {
+    .k-seg__thumb,
+    .k-seg[data-dir] .k-seg__thumb,
+    .k-listgroup__bar,
+    .k-dial__hl,
+    .k-dial__slot,
+    .k-dial__upright {
+      transition-property: opacity;
+    }
+    .k-row__bar {
+      transform: none;
+    }
+    .k-panel,
+    .k-swap,
+    .k-toast,
+    .k-ui-popover,
+    .k-ui-tooltip,
+    .k-ui-dialog {
+      animation-name: k-fade-only;
+    }
+    .k-rec__dot {
+      animation: none;
+    }
+  }
+}
+
+@keyframes k-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes k-dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes k-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes k-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes k-blink {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ───────── accent dropdown option (DJ) ─────────
+   Text: the three accent hues lifted to a readable lightness. Background: a faint accent tint with
+   small four-point stars twinkling in turn. Reduced motion: the stars stay, still and dim. */
+@layer components {
+  .k-accent-text {
+    background-image: linear-gradient(
+      100deg,
+      oklch(from var(--accent-start) 0.9 0.12 h) 0%,
+      oklch(from var(--accent-mid) 0.84 0.12 h) 50%,
+      oklch(from var(--accent-end) 0.82 0.13 h) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .k-accent-ink {
+    color: oklch(from var(--accent-start) 0.86 0.09 h);
+  }
+  .k-dd__option--accent {
+    background-image: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--accent-start) 45%, transparent) 0%,
+      color-mix(in srgb, var(--accent-mid) 18%, transparent) 45%,
+      transparent 85%
+    );
+    transition: filter 100ms ease-out;
+  }
+  .k-dd__option--accent[data-active='true'] {
+    filter: brightness(1.35);
+  }
+  .k-dd__stars {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(90deg, #000 0%, transparent 80%);
+    mask-image: linear-gradient(90deg, #000 0%, transparent 80%);
+  }
+  .k-dd__star {
+    position: absolute;
+    background: oklch(from var(--accent-end) 0.95 0.05 h);
+    clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+    opacity: 0;
+    transform: scale(0.3);
+    animation: k-twinkle 2.6s ease-in-out infinite;
+  }
+  @keyframes k-twinkle {
+    0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+    45% { opacity: 0.8; transform: scale(1) rotate(45deg); }
+    70% { opacity: 0; transform: scale(0.5) rotate(90deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .k-dd__star { animation: none; opacity: 0.45; transform: scale(0.7); }
+  }
+}

@@ -1,0 +1,173 @@
+/* Main dial, Apps and the First run knob. Wrapped in @layer components so Tailwind v4 utilities take precedence. */
+
+@layer components {
+  /* ───────── split layout: content column + 360 px side panel at the window edge ───────── */
+  .split { position: absolute; inset: 0; display: flex; min-width: 0; overflow: hidden; }
+  /* non-scrolling pane: the delete band is portalled here, so it never reaches the side panel */
+  .split__pane { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+  .split__main {
+    flex: 1; min-height: 0; min-width: 0; display: flex; flex-direction: column; gap: 22px; padding: 28px 32px 32px;
+    overflow-x: hidden; overflow-y: auto;
+  }
+  .split > .k-panel { flex: none; height: auto; align-self: stretch; }
+  .split .k-panel__body { gap: 22px; }
+
+  /* panel fields */
+  .pf { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .pf__row { display: flex; align-items: flex-end; gap: 12px; min-width: 0; }
+  .pf__grow { flex: 1; min-width: 0; }
+  .pf__note { margin: 0; font-size: 13px; line-height: 1.45; color: var(--k-muted-fg); }
+  .pf__keys { margin: 0; }
+  /* ───────── First run: the press-to-test knob ───────── */
+  .fr__press { position: relative; display: grid; place-items: center; width: 220px; height: 220px; padding: 0; border: 0; border-radius: var(--radius-full); background: transparent; cursor: default; -webkit-app-region: no-drag; }
+  .fr__ring { position: absolute; border: 1px solid var(--accent-solid); border-radius: var(--radius-full); animation: fr-breathe 2.4s ease-in-out infinite; }
+  .fr__ring--out { inset: 0; }
+  .fr__ring--in { inset: 18px; animation-delay: 0.3s; }
+  .fr__knob2 { display: grid; place-items: center; width: 150px; height: 150px; border-radius: var(--radius-full); background: var(--surface-ring); box-shadow: inset 0 0 0 1px var(--border-strong); }
+  .fr__cap2 {
+    position: relative; width: 100px; height: 100px; border-radius: var(--radius-full); background: var(--surface-hover); box-shadow: inset 0 0 0 1px var(--accent-solid);
+    transition: transform var(--dur-instant) var(--ease-out);
+  }
+  .fr__ind { position: absolute; left: 50%; top: 4px; width: 4px; height: 20px; margin-left: -2px; border-radius: 2px; background: var(--accent-solid); }
+  .fr__press--down .fr__cap2 { transform: scale(0.94); }
+  .fr__press--down .fr__ring { animation: fr-burst var(--dur-slow) var(--ease-out) both; }
+  .fr__press--down .fr__ring--in { animation-delay: 0.06s; }
+
+  /* folder editor */
+  .folder-item {
+    display: flex; align-items: center; gap: 10px; min-width: 0; min-height: 44px; padding: 0 6px 0 12px;
+    margin: 0 -8px; border-radius: 12px; transition: background-color var(--dur-instant) var(--ease-out);
+  }
+  .folder-item:hover { background: rgb(255 255 255 / 0.055); }
+  .folder-item__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14.5px; font-weight: 500; color: var(--k-fg); }
+  .folder-adder {
+    display: flex; flex-direction: column; gap: 16px; padding: 16px; border-radius: 16px;
+    background: var(--k-table-bg);
+    border: 1px solid var(--k-border);
+    box-shadow: none;
+  }
+  .home__warning { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .folder-item .k-iconbtn { width: 30px; height: 30px; }
+  .apps__stage { position: relative; min-width: 0; flex: 1; }
+
+  /* ───────── Main dial (also the app dial on Apps) ───────── */
+  .mdial { position: relative; flex: none; width: 100%; display: flex; flex-direction: column; align-items: center; gap: var(--space-24); touch-action: none; }
+  .mdial__stage { position: relative; width: 100%; height: var(--dial); display: grid; place-items: center; }
+  .mdial[data-dragging], .mdial[data-dragging] button { cursor: grabbing; }
+
+  /* labels: parked at the centre and pushed out along the same arm as their icon, so they slide with it */
+  .mdial__label {
+    position: absolute; left: 50%; top: 50%; transform-origin: 0 0; display: flex; flex-direction: column; gap: 3px; max-width: 144px;
+    padding: 6px 10px; border: 0; border-radius: 10px; background: transparent; text-align: left;
+    cursor: pointer; -webkit-app-region: no-drag;
+    transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-fast) var(--ease-out), background-color var(--dur-instant) var(--ease-out);
+  }
+  .mdial__label[data-side='left'] { text-align: right; }
+  .mdial__label[data-side='mid'] { text-align: center; }
+  .mdial__label:hover { background: rgb(255 255 255 / 0.07); }
+  .mdial__label:focus-visible { outline: 1px solid var(--k-active-border); outline-offset: 0; }
+  .mdial__label[data-lifted='true'] { opacity: 0.35; }
+  .mdial__label[data-snap='true'] { transition: none; }
+  .mdial[data-dragging] .mdial__label:hover, .mdial[data-dragging] .k-dialpick__hit { background: transparent; }
+  .mdial__name { font-size: 13.5px; font-weight: 500; line-height: 1.3; color: #f5f7fa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mdial__label[data-empty='true'] .mdial__name { color: var(--k-muted-fg); font-weight: 400; }
+  .mdial__kind { font-size: 12.5px; font-weight: 400; line-height: 1.3; color: #9aa3b5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mdial__label[aria-pressed='true'] .mdial__name { color: var(--accent-text); }
+
+  /* breadcrumb: hidden on the main dial, the row keeps its height */
+  .mdial__crumbs { display: flex; align-items: center; gap: var(--space-4); min-height: 28px; margin: calc(-1 * var(--space-8)) 0 calc(-1 * var(--space-8)) calc(-1 * var(--space-8)); color: var(--text-muted); }
+  .mdial__crumbs[data-root='true'] { visibility: hidden; }
+  .mdial__crumbs button {
+    height: 28px; padding: 0 10px; border: 0; border-radius: var(--radius-sm); background: transparent; font: var(--text-body); color: var(--text-secondary);
+    cursor: pointer; -webkit-app-region: no-drag; transition: background-color var(--dur-instant) var(--ease-out), color var(--dur-instant) var(--ease-out);
+  }
+  .mdial__crumbs button:hover { background: var(--k-secondary); color: var(--text-primary); }
+  .mdial__crumbs button[aria-current='page'] { color: var(--text-primary); font: var(--text-body-strong); background: color-mix(in srgb, var(--k-secondary) 55%, transparent); }
+  .mdial__crumbs button:focus-visible, .mdial__back:focus-visible { outline: 1px solid var(--k-active-border); outline-offset: 1px; }
+
+  /* back button in the hole of the ring */
+  .mdial__back {
+    position: absolute; left: 50%; top: 50%; border: 0; border-radius: var(--radius-full); padding: 6px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-4);
+    background: var(--surface-base); color: var(--text-secondary); font: var(--text-body-strong); cursor: pointer; -webkit-app-region: no-drag;
+    transition: color var(--dur-instant) var(--ease-out), background-color var(--dur-instant) var(--ease-out);
+  }
+  .mdial__back span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-primary); font-size: 12px; }
+  .mdial__back:hover { color: var(--text-primary); background: var(--surface-raised); }
+  /* inside a folder / app the back button IS the centre label: hide the preview's own centre text (the selected slot's name), it would bleed out round the button */
+  .mdial__stage:has(.mdial__back) .k-dialpick .k-dial__centre { visibility: hidden; }
+
+  /* level change: old icons shrink out (grow out going back) */
+  .mdial__depart { position: absolute; pointer-events: none; }
+  .mdial__depart .k-dial__svg, .mdial__depart .k-dial__centre { visibility: hidden; }
+  .mdial__depart .k-dial__icon { animation: mdial-depart var(--dur-fast) var(--ease-out) both; }
+  .mdial[data-backward='true'] .mdial__depart .k-dial__icon { animation-name: mdial-depart-back; }
+
+  /* header tools: undo, redo | reset, level with the title line */
+  .k-page__side:has(.mdial__tools) { align-self: flex-start; height: 36px; }
+  .mdial__tools { display: flex; align-items: center; gap: var(--space-4); }
+  .mdial__toolsep { width: 1px; height: 16px; margin: 0 var(--space-4); background: var(--border-strong); }
+
+  /* under the wheel: the round + button, and while dragging the delete band in the same space */
+  .mdial__foot { position: relative; align-self: stretch; height: 64px; display: grid; place-items: center; }
+  .mdial__foot > * { grid-area: 1 / 1; transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
+  .mdial__foot .mdial__plus { width: 40px; height: 40px; border-radius: var(--radius-full); background: var(--surface-ring); color: var(--text-primary); }
+  .mdial__foot .mdial__plus:hover:not(:disabled) { background: var(--surface-hover); }
+  .mdial__foot[data-dragging='true'] .mdial__add { opacity: 0; transform: scale(0.9); pointer-events: none; }
+  .mdial__remove {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 20; height: 96px;
+    display: flex; align-items: center; justify-content: center; gap: var(--space-8);
+    color: var(--status-error); font: var(--text-body-strong); white-space: nowrap;
+    background:
+      linear-gradient(0deg, color-mix(in srgb, var(--status-error) 24%, transparent), transparent);
+    opacity: 0; transform: translateY(12px); pointer-events: none;
+    transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+  }
+  .mdial__remove .icon { transition: transform var(--dur-fast) var(--ease-out); }
+  .mdial__remove[data-visible='true'] { opacity: 1; transform: none; pointer-events: auto; }
+  .mdial__remove[data-armed='true'] {
+    background:
+      linear-gradient(0deg, color-mix(in srgb, var(--status-error) 48%, transparent), transparent);
+  }
+  .mdial__remove[data-armed='true'] .icon { transform: scale(1.15); }
+  .mdial__remove[data-blocked='true'] {
+    color: var(--text-muted);
+    background:
+      linear-gradient(0deg, color-mix(in srgb, var(--surface-raised) 70%, transparent), transparent);
+  }
+
+  /* the lifted slot: its icon in a raised round chip that follows the pointer */
+  .mdial__chip { position: fixed; left: 0; top: 0; z-index: 100; width: 48px; height: 48px; pointer-events: none; display: grid; place-items: center; }
+  .mdial__chipbg, .mdial__chipicon { grid-area: 1 / 1; transition: transform var(--dur-fast) var(--ease-out); }
+  .mdial__chipbg {
+    position: relative; width: 48px; height: 48px; border-radius: var(--radius-full); background: var(--surface-hover);
+    box-shadow: var(--shadow-pill), inset 0 0 0 1px var(--border-strong); animation: mdial-lift var(--dur-fast) var(--ease-out) both;
+  }
+  .mdial__chipbg::after {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; background: var(--error-tint); box-shadow: inset 0 0 0 1px var(--status-error);
+    opacity: 0; transition: opacity var(--dur-fast) var(--ease-out);
+  }
+  .mdial__chipicon { position: relative; display: flex; color: var(--text-primary); transition: transform var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
+  .mdial__chip[data-armed='true'] .mdial__chipbg, .mdial__chip[data-armed='true'] .mdial__chipicon { transform: scale(0.84); }
+  .mdial__chip[data-armed='true'] .mdial__chipbg::after { opacity: 1; }
+  .mdial__chip[data-armed='true'] .mdial__chipicon { color: var(--status-error); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fr__press--down .fr__cap2 { transform: none; }
+    .fr__ring { animation: none; opacity: 0.7; }
+    .fr__press--down .fr__ring { animation: fr-fade var(--dur-slow) both; }
+
+    .mdial__label { transition-property: opacity, background-color; }
+    .mdial__depart .k-dial__icon, .mdial[data-backward='true'] .mdial__depart .k-dial__icon { animation-name: k-fade-only; animation-direction: reverse; }
+    .mdial__foot > *, .mdial__foot[data-dragging='true'] .mdial__add, .mdial__remove, .mdial__remove[data-armed='true'] .icon,
+    .mdial__chip[data-armed='true'] .mdial__chipbg, .mdial__chip[data-armed='true'] .mdial__chipicon { transform: none; }
+    .mdial__chipbg { animation-name: k-fade-only; }
+  }
+}
+
+@keyframes fr-breathe { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.9; } }
+@keyframes fr-burst { from { opacity: 0.9; transform: scale(1); } to { opacity: 0; transform: scale(1.14); } }
+@keyframes fr-fade { from { opacity: 0.7; } to { opacity: 0; } }
+@keyframes mdial-depart { to { opacity: 0; transform: scale(.7); } }
+@keyframes mdial-depart-back { to { opacity: 0; transform: scale(1.18); } }
+@keyframes mdial-lift { from { transform: scale(0.8); opacity: 0.6; } }

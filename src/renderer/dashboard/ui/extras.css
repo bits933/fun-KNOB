@@ -1,0 +1,101 @@
+/* Kit additions (DialPicker, row fade). Wrapped in @layer components so Tailwind utilities win. */
+
+@layer components {
+  /* ───────── Dial picker ───────── */
+  .k-dialpick {
+    position: relative;
+    flex: none;
+  }
+  .k-dialpick__hit {
+    position: absolute;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-full);
+    background: transparent;
+    cursor: pointer;
+    -webkit-app-region: no-drag;
+    transition: background-color var(--dur-fast) var(--ease-out), transform var(--dur-base) var(--ease-out);
+  }
+  .k-dialpick--snap .k-dialpick__hit {
+    transition: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .k-dialpick__hit {
+      transition-property: background-color;
+    }
+  }
+  .k-dialpick__hit:hover {
+    background: rgb(255 255 255 / 0.06);
+  }
+  .k-dialpick__hit:active {
+    background: rgb(255 255 255 / 0.1);
+  }
+  .k-dialpick__hit:focus-visible {
+    outline: 1px solid var(--k-active-border);
+    outline-offset: -1px;
+  }
+  .k-dialpick--none .k-dial__hl,
+  .k-dialpick--none .k-dial__name {
+    opacity: 0;
+  }
+  .k-dialpick--none .k-dial__icon--hl {
+    color: var(--text-secondary);
+  }
+  .k-dialpick--none .k-dial__icon--hl img {
+    opacity: 0.72;
+  }
+  .k-dialpick .k-dial__level {
+    color: var(--accent-text);
+    font-size: 10px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+
+  /* ───────── Row enter / leave (use with useFadeRemove) ───────── */
+  .k-row-enter {
+    animation: k-row-in var(--dur-base) var(--ease-out) both;
+  }
+  .k-row-leave {
+    animation: k-row-out var(--dur-fast) var(--ease-in) both;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .k-row-enter {
+      animation-name: k-fade-only;
+    }
+    .k-row-leave {
+      animation-name: k-fade-out-only;
+    }
+  }
+}
+
+@keyframes k-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes k-row-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes k-fade-out-only {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

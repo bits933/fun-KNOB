@@ -1,0 +1,432 @@
+/* Overlay page. Sizes are the Figma 420 px dial (600 px scaled by 0.7) and the Readout pill at 1:1.
+   Motion: transform + opacity only (see prd/BUILD_PLAN.md section 5). */
+
+html,
+body {
+  background: transparent;
+  overflow: hidden;
+}
+
+/* The window covers the work area. 560 x 640 design box, scaled by the dial size setting. It sits in the same
+   32 px inset grid as the level ring; the negative margins leave just the 295.4 px ring for the grid to align, and
+   the scale origin (set inline) is the ring's anchored edge, so dial and ring hug the same spot. */
+.stage {
+  position: relative;
+  width: 560px;
+  height: 640px;
+  margin: -110.3px -132.3px -234.3px;
+  transform: scale(var(--s, 1));
+}
+
+/* ───────── dial ───────── */
+
+.dial {
+  position: absolute;
+  left: 70px;
+  top: 48px;
+  width: 420px;
+  height: 420px;
+  opacity: 0;
+  transform: scale(0.96);
+  transform-origin: 50% 50%;
+  transition:
+    opacity var(--dur-instant) var(--ease-in),
+    transform var(--dur-instant) var(--ease-in);
+}
+.dial[data-open='true'] {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+.dial[data-open='true'][data-paused='true'] {
+  opacity: 0.4;
+}
+
+.dial > * {
+  position: absolute;
+}
+.ring {
+  left: 62.3px;
+  top: 62.3px;
+  width: 295.4px;
+  height: 295.4px;
+  border-radius: 50%;
+  background: var(--surface-ring);
+  box-shadow: 0 4px 22.4px rgb(0 0 0 / 0.41), inset 0 0 0 1px rgb(255 255 255 / 0.03);
+}
+/* 1 px edge: #999 -> #fff at 14 % over black, top to bottom (Figma inside stroke). */
+.hole {
+  left: 132.3px;
+  top: 132.3px;
+  width: 155.4px;
+  height: 155.4px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface-base) 0 0) padding-box,
+    linear-gradient(#151515, #242424) border-box;
+  box-shadow: 0 2px 16.9px rgb(0 0 0 / 0.25);
+}
+
+/* Highlight: --a is the continuous angle in degrees. The wedge, its gradient (light side facing out) and the
+   marker all rotate by it. */
+.seg {
+  inset: 0;
+  transform-origin: 210px 210px;
+  transform: rotate(calc(var(--a, 0) * 1deg));
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.seg-pulse {
+  position: absolute;
+  inset: 0;
+  transform-origin: 210px 210px;
+}
+.seg-grad {
+  position: absolute;
+  left: 62.3px;
+  top: 62.3px;
+  width: 295.4px;
+  height: 295.4px;
+  /* Figma: light at the outer edge, deep at the inner edge (wedge spans 0 - 23.7 % of the box) */
+  background: linear-gradient(180deg, var(--accent-light) 0%, var(--accent-mid) 22.3%, var(--accent-end) 57%);
+}
+.dial[data-snap='true'] .seg {
+  transition: none;
+}
+.marker {
+  position: absolute;
+  left: 206.5px;
+  top: 75.25px;
+  width: 7px;
+  height: 6.3px;
+  background: var(--text-primary);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+/* ───────── slots ───────── */
+
+.slots {
+  inset: 0;
+  transform-origin: 210px 210px;
+  --s0: 0.8; /* entry scale; leaving uses --s1 */
+  --s1: 0.9;
+}
+.slot {
+  position: absolute;
+  width: 19.6px;
+  height: 19.6px;
+}
+.slot-icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+  color: var(--text-primary);
+  opacity: 0.63;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.slot-icon[data-on='true'] {
+  opacity: 1;
+}
+.slot-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3.5px;
+  height: 3.5px;
+  margin: -1.75px 0 0 -1.75px;
+  border-radius: 50%;
+  background: var(--accent-text);
+}
+
+/* Entering a level: icons fade + grow in with a small stagger. Going back: they come from larger. */
+.enter-in .slot,
+.enter-out .slot {
+  animation: slot-in 160ms var(--ease-out) both;
+  animation-delay: calc(var(--i) * 14ms);
+}
+.enter-out {
+  --s0: 1.2;
+}
+.leave-in,
+.leave-out {
+  animation: layer-out var(--dur-instant) var(--ease-in) both;
+}
+.leave-out {
+  --s1: 1.1;
+}
+@keyframes slot-in {
+  from {
+    opacity: 0;
+    transform: scale(var(--s0));
+  }
+}
+@keyframes layer-out {
+  to {
+    opacity: 0;
+    transform: scale(var(--s1));
+  }
+}
+
+/* ───────── centre ───────── */
+
+.centre {
+  left: 140px;
+  top: 140px;
+  width: 140px;
+  height: 140px;
+}
+.centre-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4.2px;
+  text-align: center;
+}
+.c-level {
+  font: 500 8.4px/1.3 var(--font);
+  letter-spacing: 0.14px;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+.c-name {
+  max-width: 126px;
+  font: 500 19.6px/1.1 var(--font);
+  letter-spacing: -0.35px;
+  color: var(--text-primary);
+}
+.c-hint {
+  max-width: 119px;
+  font: 400 8.4px/1.3 var(--font);
+  color: var(--text-muted);
+}
+.fade-in {
+  animation: fade-in var(--dur-base) var(--ease-out) both;
+}
+.fade-out {
+  animation: fade-out var(--dur-instant) var(--ease-in) both;
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* ───────── level dial (Volume / Brightness / Mic) ─────────
+   Reuses .dial / .ring / .hole. The arc glides by stroke-dashoffset and the end dot by rotate; both
+   are plain transitions, so a new value retargets from the current position (nothing is queued). */
+
+/* Level ring placement: a 32 px inset grid; the box is the ring's 304 px footprint and scales from the
+   edge it is anchored to (alignment and origin are set inline from levelPosition). */
+.level-layer {
+  position: absolute;
+  inset: 32px;
+  display: grid;
+}
+.level-box {
+  position: relative;
+  width: 304px;
+  height: 304px;
+}
+.level-box > .level {
+  left: -58px;
+  top: -58px;
+}
+/* Just the ring: the track (dark remainder) is an annulus with a black centre, no disc behind it. */
+.level .ring {
+  background: var(--surface-base) padding-box;
+  border: 70px solid var(--surface-ring);
+  box-sizing: border-box;
+  box-shadow: 0 4px 22.4px rgb(0 0 0 / 0.41);
+}
+.level .hole {
+  box-shadow: none;
+}
+.level .lvl-num,
+.level .lvl-muted,
+.level .c-name {
+  text-shadow:
+    0 1px 3px rgb(0 0 0 / 0.55),
+    0 0 12px rgb(0 0 0 / 0.4);
+}
+.level-svg {
+  left: 0;
+  top: 0;
+  width: 420px;
+  height: 420px;
+  overflow: visible;
+}
+.level-arc {
+  stroke-dasharray: 100 100;
+  transition: stroke-dashoffset var(--dur-base) var(--ease-out);
+}
+/* Soft shadow the played arc casts past its end line (Figma: black 50 %, layer blur 8.7). */
+.level-shadow {
+  transition: stroke-dashoffset var(--dur-base) var(--ease-out), stroke-dasharray var(--dur-base) var(--ease-out);
+}
+/* End marker: rotates about the dial centre. The dot sits on the ring's outer edge (r 147.7), a 1 px
+   lighter line runs from it to the inner radius along the arc's end edge. */
+.level-end {
+  inset: 0;
+  transform-origin: 210px 210px;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.level-end > i {
+  position: absolute;
+  display: block;
+}
+.level-edge {
+  left: 209.5px;
+  top: 62.3px;
+  width: 1px;
+  height: 70px;
+  background: var(--accent-glow);
+}
+.level-end[data-zero='true'] .level-edge {
+  opacity: 0;
+}
+.level-dot {
+  left: 206px;
+  top: 58.3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-text);
+}
+.level[data-snap='true'] .level-arc,
+.level[data-snap='true'] .level-shadow,
+.level[data-snap='true'] .level-end {
+  transition: none;
+}
+.level .centre-text {
+  gap: 8px;
+}
+.level .c-name {
+  font: 500 13.5px/1 var(--font);
+  letter-spacing: 0;
+  color: var(--text-secondary);
+}
+.lvl-num {
+  font: 400 37px/1 var(--font);
+  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+.lvl-muted {
+  font: 400 24px/1 var(--font);
+  letter-spacing: -0.3px;
+  color: var(--text-secondary);
+}
+
+/* ───────── readout pill ───────── */
+
+/* Always bottom-centre of the work area, i.e. just above the taskbar, whatever the dial position. */
+.readout-slot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+.readout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 46px;
+  padding: 0 20px 0 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: var(--surface-base);
+  box-shadow: var(--shadow-pill);
+  font: var(--text-body-strong);
+  color: var(--text-primary);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity var(--dur-instant) var(--ease-in),
+    transform var(--dur-instant) var(--ease-in);
+}
+.readout[data-show='true'] {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+}
+.pill-icon {
+  display: flex;
+  color: var(--text-primary);
+}
+.readout[data-kind='message'] .pill-icon {
+  color: var(--accent-text);
+}
+.readout[data-kind='warning'] .pill-icon {
+  color: var(--status-warning);
+}
+.pill-bar {
+  flex: none;
+  width: 96px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--surface-hover);
+  overflow: hidden;
+}
+.pill-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--accent-text);
+  transform-origin: 0 50%;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.pill-value {
+  font: var(--text-body);
+  color: var(--text-secondary);
+}
+
+/* Windows "reduce animations": fades only, no movement. */
+@media (prefers-reduced-motion: reduce) {
+  .dial,
+  .dial[data-open='true'] {
+    transform: none;
+  }
+  .seg,
+  .seg-grad {
+    transition: none;
+  }
+  .slots {
+    --s0: 1;
+    --s1: 1;
+  }
+  .enter-out,
+  .leave-out {
+    --s0: 1;
+    --s1: 1;
+  }
+  .readout,
+  .readout[data-show='true'] {
+    transform: none;
+  }
+  .pill-fill,
+  .level-arc,
+  .level-shadow,
+  .level-end {
+    transition: none;
+  }
+}
+
+/* Nothing to highlight (e.g. an empty folder). */
+.dial[data-empty='true'] .seg {
+  opacity: 0;
+}

@@ -1,0 +1,80 @@
+/* Dashboard window frame, DesignCode UI ambient backdrop & screen transitions. */
+
+@layer components {
+  .app {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background: #07090d;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 14px;
+    box-shadow: none;
+    overflow: hidden;
+  }
+  .app__body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+  }
+  .app__screens {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    background:
+      radial-gradient(ellipse 62% 48% at 58% -4%, rgba(43, 106, 94, 0.11) 0%, transparent 66%),
+      radial-gradient(ellipse 46% 42% at 10% 104%, rgba(43, 110, 121, 0.06) 0%, transparent 64%),
+      #07090d;
+    overflow: hidden;
+  }
+
+  /* Screen switching: old fades out, new fades in (+ 6 px rise); reduced motion = fades only */
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 28px 36px 32px;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  .screen--in {
+    animation: screen-in var(--dur-base) var(--ease-out) both;
+  }
+  .screen--leaving {
+    animation: screen-out var(--dur-fast) var(--ease-in) both;
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .screen--in {
+      animation-name: k-fade-only;
+    }
+  }
+
+  .home {
+    display: contents;
+  }
+}
+
+@keyframes screen-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes screen-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
