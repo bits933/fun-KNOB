@@ -49,7 +49,7 @@ export function Settings({ toast }: ScreenProps): React.JSX.Element {
                   flush
                   icon="power"
                   title="Start with Windows"
-                  subtitle="Launch Kreo Dial when you sign in"
+                  subtitle="Launch fun KNOB when you sign in"
                   trailing={<Switch label="Start with Windows" checked={gen.startWithWindows} onChange={(v) => set({ startWithWindows: v })} />}
                 />
                 <Separator className="my-1.5" />

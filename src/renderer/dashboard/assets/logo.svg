@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="512" height="512" role="img" aria-label="fun KNOB">
+  <defs>
+    <linearGradient id="bg" x1="12" y1="8" x2="116" y2="124" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7dffc9"/>
+      <stop offset="0.5" stop-color="#22d286"/>
+      <stop offset="1" stop-color="#0f5f55"/>
+    </linearGradient>
+    <radialGradient id="knob" cx="0.35" cy="0.28" r="0.85">
+      <stop offset="0" stop-color="#2a3430"/>
+      <stop offset="1" stop-color="#0a0d0c"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.04"/>
+    </linearGradient>
+    <linearGradient id="pointer" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#7dffc9"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="30" fill="url(#bg)"/>
+  <circle cx="64" cy="66" r="38" fill="#000" opacity="0.25" transform="translate(0 4)"/>
+  <circle cx="64" cy="64" r="38" fill="url(#knob)"/>
+  <circle cx="64" cy="64" r="37.5" fill="none" stroke="url(#rim)" stroke-width="1.5"/>
+  <rect x="60.5" y="31" width="7" height="20" rx="3.5" fill="url(#pointer)"/>
+  <circle cx="50" cy="68" r="3.6" fill="#7dffc9"/>
+  <circle cx="78" cy="68" r="3.6" fill="#7dffc9"/>
+  <path d="M51 80 Q64 92 77 80" fill="none" stroke="#7dffc9" stroke-width="4" stroke-linecap="round"/>
+</svg>

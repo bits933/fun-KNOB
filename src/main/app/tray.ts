@@ -13,6 +13,6 @@ export function createTray(opts: Options): Tray {
 export function updateTray(): void {
   if (!tray) return
   const paused = options.isPaused()
-  tray.setToolTip(paused ? 'Kreo Dial (paused)' : 'Kreo Dial')
+  tray.setToolTip(paused ? 'fun KNOB (paused)' : 'fun KNOB')
   tray.setContextMenu(Menu.buildFromTemplate([{ label: 'Open dashboard', click: options.onOpen }, { label: paused ? 'Resume' : 'Pause', click: options.onTogglePause }, { label: 'Quit', click: options.onQuit }]))
 }

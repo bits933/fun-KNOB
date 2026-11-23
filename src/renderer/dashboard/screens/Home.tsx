@@ -16,7 +16,7 @@ export function Home({ navigate }: ScreenProps): React.JSX.Element {
       <PageHeader title="Home" description="Your knob, at a glance." side={enabled && <Badge type="running" />} />
       {!enabled && (
         <Banner action={<Button variant="primary" size="sm" onClick={() => void update((s) => { s.enabled = true })}>Resume</Button>}>
-          Kreo Dial is paused. The knob controls volume as normal.
+          fun KNOB is paused. The knob controls volume as normal.
         </Banner>
       )}
       {readout?.kind === 'warning' && (

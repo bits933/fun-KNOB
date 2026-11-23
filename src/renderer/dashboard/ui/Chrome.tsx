@@ -5,6 +5,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '../components/ui/toolti
 import { cn } from '../lib/utils'
 import { IconButton } from './Button'
 import { Switch } from './Switch'
+import logoUrl from '../assets/logo.svg'
 
 /**
  * Custom window title bar (44 px). The bar is a drag region; the two buttons are not.
@@ -13,8 +14,8 @@ export function TitleBar({ onMinimize, onClose }: { onMinimize: () => void; onCl
   return (
     <div className="k-titlebar flex items-center justify-between shrink-0 h-11 pl-4 pr-2.5 border-b border-[#1c1c1c] bg-[#0b0d11] backdrop-blur-xl select-none">
       <div className="k-titlebar__title flex items-center gap-2.5 text-[13px] font-medium text-muted-foreground">
-        <span className="k-mark k-mark--sm" />
-        <span>Kreo Dial</span>
+        <img src={logoUrl} alt="" width={20} height={20} className="shrink-0 rounded-[5px]" draggable={false} />
+        <span>fun KNOB</span>
       </div>
       <div className="k-titlebar__ctrl flex items-center gap-1">
         <IconButton icon="minimize" label="Minimize" iconSize={16} className="h-8 w-8 rounded-lg" onClick={onMinimize} />
@@ -183,7 +184,7 @@ export function NavRail({
             <span className="k-nav__label flex-1 min-w-0 text-[14px] font-medium text-foreground truncate whitespace-nowrap">
               {running ? 'Running' : 'Paused'}
             </span>
-            <Switch label="Run Kreo Dial" checked={running} onChange={onToggleRunning} />
+            <Switch label="Run fun KNOB" checked={running} onChange={onToggleRunning} />
           </div>
         </div>
       )}
